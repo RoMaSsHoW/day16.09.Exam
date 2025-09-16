@@ -33,7 +33,7 @@ namespace Exam.Application.Services
                 return;
             }
 
-            if (accauntFrom.Balance < amount)
+            if (accauntFrom.Balance < amount * 1.01m)
             {
                 transaction.Status = "Failed";
                 await _transactionRepository.CreateAsync(transaction);
@@ -50,8 +50,5 @@ namespace Exam.Application.Services
 
             await _transactionRepository.CreateAsync(transaction);
         }
-
-
-
     }
 }
