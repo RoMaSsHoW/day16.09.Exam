@@ -1,4 +1,5 @@
-﻿using Exam.Application.Repositories;
+﻿using Dapper;
+using Exam.Application.Repositories;
 using Exam.Domain.Entities;
 using System.Data;
 
@@ -13,29 +14,69 @@ namespace Exam.Infrastructure.Repositories
             _dbConnection = dbConnection;
         }
 
-        public Task<Customer>? FindByIdAsync(int id)
+        public async Task<Customer?> FindByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var sql = @"
+                select
+                    id as Id,
+                    fullname as FullName,   
+                    phone as Phone,
+                    email as Email,
+                    registeredat as RegisteredAt,
+                    isactive as IsActive
+                from customers
+                where id = @id";
+
+            return await _dbConnection.QueryFirstOrDefaultAsync<Customer>(sql, new { id });
         }
 
-        public Task<IEnumerable<Customer>> FindAllAsync()
+        public async Task<IEnumerable<Customer>> FindAllAsync()
         {
-            throw new NotImplementedException();
+            var sql = @"
+                select
+                    id as Id,
+                    fullname as FullName,   
+                    phone as Phone,
+                    email as Email,
+                    registeredat as RegisteredAt,
+                    isactive as IsActive
+                from customers";
+
+            return await _dbConnection.QueryAsync<Customer>(sql);
         }
 
-        public Task<int> CreateAsync(Customer customer)
+        public async Task<int> CreateAsync(Customer customer)
         {
-            throw new NotImplementedException();
+            var sql = @"
+                insert into customers (fullname, phone, email, registeredat)
+                values 
+                    (@FullName, @Phone, @Email, @RegisteredAt)
+                returning id;";
+
+            return await _dbConnection.ExecuteScalarAsync<int>(sql, customer);
         }
 
-        public Task<int> UpdateAsync(Customer customer)
+        public async Task<int> UpdateAsync(Customer customer)
         {
-            throw new NotImplementedException();
+            var sql = @"
+                update customers
+                set fullname = @FullName,
+                    phone = @Phone,
+                    email = @Email,
+                    isactive = @IsActive
+                where id = @Id;";
+
+            return await _dbConnection.ExecuteAsync(sql, customer);
         }
 
-        public Task<int> DeleteAsync(int id)
+        public async Task<int> DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            var sql = @"
+                delete
+                from customers
+                where id = @id";
+
+            return await _dbConnection.ExecuteAsync(sql, new { id });
         }
     }
 }

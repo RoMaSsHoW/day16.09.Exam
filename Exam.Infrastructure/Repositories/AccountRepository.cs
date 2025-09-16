@@ -17,17 +17,27 @@ namespace Exam.Infrastructure.Repositories
         public async Task<Account?> FindByIdAsync(int id)
         {
             var sql = @"
-                select * 
+                select 
+                    id as Id,
+                    customerid as CustomerId,
+                    accountnumber as AccountNumber,
+                    balance as Balance,
+                    currency as Currency
                 from accounts 
                 where id = @id";
 
-            return await _dbConnection.QuerySingleOrDefaultAsync<Account>(sql, new { id });
+            return await _dbConnection.QueryFirstOrDefaultAsync<Account>(sql, new { id });
         }
 
         public async Task<IEnumerable<Account>> FindAllAsync()
         {
             var sql = @"
-                select *
+                select 
+                    id as Id,
+                    customerid as CustomerId,
+                    accountnumber as AccountNumber,
+                    balance as Balance,
+                    currency as Currency
                 from accounts";
 
             return await _dbConnection.QueryAsync<Account>(sql);
@@ -38,7 +48,7 @@ namespace Exam.Infrastructure.Repositories
             var sql = @"
                 insert into accounts (customerid, accountnumber, balance, currency)
                 values 
-                    (@customerid, @accountnumber, @balance, @currency)
+                    (@CustomerId, @AccountNumber, @Balance, @Currency)
                 returning id;";
 
             return await _dbConnection.ExecuteScalarAsync<int>(sql, account);
@@ -48,9 +58,9 @@ namespace Exam.Infrastructure.Repositories
         {
             var sql = @"
                 update accounts
-                set balance = @balance,
-                    currency = @currency
-                where id = @id;";
+                set balance = @Balance,
+                    currency = @Currency
+                where id = @Id;";
 
             return await _dbConnection.ExecuteAsync(sql, account);
         }
