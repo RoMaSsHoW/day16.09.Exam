@@ -28,11 +28,11 @@ namespace Exam.Domain.Entities
             var rand = new Random();
             for (var i = 0; i < 10; i++)
             {
-                var number = rand.Next(9);
+                var number = rand.Next(0, 10);
                 accNumber.Append(number);
             }
 
-            return string.Empty;
+            return accNumber.ToString();
         }
     }
 }
