@@ -1,4 +1,5 @@
-﻿using Exam.Application.Repositories;
+﻿using Dapper;
+using Exam.Application.Repositories;
 using Exam.Domain.Entities;
 using System.Data;
 
@@ -13,29 +14,55 @@ namespace Exam.Infrastructure.Repositories
             _dbConnection = dbConnection;
         }
 
-        public Task<Account>? FindByIdAsync(int id)
+        public async Task<Account?> FindByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var sql = @"
+                select * 
+                from accounts 
+                where id = @id";
+
+            return await _dbConnection.QuerySingleOrDefaultAsync<Account>(sql, new { id });
         }
 
-        public Task<IEnumerable<Account>> FindAllAsync()
+        public async Task<IEnumerable<Account>> FindAllAsync()
         {
-            throw new NotImplementedException();
+            var sql = @"
+                select *
+                from accounts";
+
+            return await _dbConnection.QueryAsync<Account>(sql);
         }
 
-        public Task<int> CreateAsync(Account account)
+        public async Task<int> CreateAsync(Account account)
         {
-            throw new NotImplementedException();
+            var sql = @"
+                insert into accounts (customerid, accountnumber, balance, currency)
+                values 
+                    (@customerid, @accountnumber, @balance, @currency)
+                returning id;";
+
+            return await _dbConnection.ExecuteScalarAsync<int>(sql, account);
         }
 
-        public Task<int> UpdateAsync(Account account)
+        public async Task<int> UpdateAsync(Account account)
         {
-            throw new NotImplementedException();
+            var sql = @"
+                update accounts
+                set balance = @balance,
+                    currency = @currency
+                where id = @id;";
+
+            return await _dbConnection.ExecuteAsync(sql, account);
         }
 
-        public Task<int> DeleteAsync(int id)
+        public async Task<int> DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            var sql = @"
+                delete
+                from accounts
+                where id = @id";
+
+            return await _dbConnection.ExecuteAsync(sql, new { id });
         }
     }
 }
