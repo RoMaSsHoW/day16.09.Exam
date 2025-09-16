@@ -1,4 +1,5 @@
-﻿using Exam.Application.Repositories;
+﻿using Dapper;
+using Exam.Application.Repositories;
 using Exam.Domain.Entities;
 using System.Data;
 
@@ -13,17 +14,38 @@ namespace Exam.Infrastructure.Repositories
             _dbConnection = dbConnection;
         }
 
-        public Task<Transaction>? FindByIdAsync(int id)
+        public async Task<Transaction?> FindByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var sql = @"
+                select 
+                    id as Id,
+                    fromaccountid as FromAccountId,
+                    toaccountid as ToAccountId,
+                    amount as Amount,
+                    performedat as PerformedAt,
+                    status as Status
+                from transactions
+                where id = @id";
+
+            return await _dbConnection.QueryFirstOrDefaultAsync<Transaction>(sql, new { id });
         }
 
-        public Task<IEnumerable<Transaction>> FindAllAsync()
+        public async Task<IEnumerable<Transaction>> FindAllAsync()
         {
-            throw new NotImplementedException();
+            var sql = @"
+                select 
+                    id as Id,
+                    fromaccountid as FromAccountId,
+                    toaccountid as ToAccountId,
+                    amount as Amount,
+                    performedat as PerformedAt,
+                    status as Status
+                from transactions";
+
+            return await _dbConnection.QueryAsync<Transaction>(sql);
         }
 
-        public Task<IEnumerable<Transaction>> SearchAsync(
+        public async Task<IEnumerable<Transaction>> SearchAsync(
             int? customer_id,
             DateTime? date_from,
             DateTime? date_to,
@@ -31,22 +53,92 @@ namespace Exam.Infrastructure.Repositories
             decimal? max_amount,
             string? status)
         {
-            throw new NotImplementedException();
+            var sql = @"
+                select
+                    t.id as Id,
+                    t.fromaccountid as FromAccountId,
+                    t.toaccountid as ToAccountId,
+                    t.amount as Amount,
+                    t.performedat as PerformedAt,
+                    t.status as Status
+                from transactions t
+                join accounts a1 on a1.id = t.fromaccountid 
+                join customers c on c.id = a1.customerid 
+                where 1 = 1";
+
+            var parameters = new DynamicParameters();
+
+            if (customer_id != null)
+            {
+                sql += " and c.id = @CustomerId";
+                parameters.Add("CustomerId", customer_id);
+            }
+
+            if (date_from != null)
+            {
+                sql += " and t.performedat >= @DateFrom";
+                parameters.Add("DateFrom", date_from);
+            }
+
+            if (date_to != null)
+            {
+                sql += " and t.performedat <= @DateTo";
+                parameters.Add("DateTo", date_to);
+            }
+
+            if (min_amount != null)
+            {
+                sql += " and t.amount >= @MinAmount";
+                parameters.Add("MinAmount", min_amount);
+            }
+
+            if (max_amount != null)
+            {
+                sql += " and t.amount <= @MaxAmount";
+                parameters.Add("MaxAmount", max_amount);
+            }
+
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                sql += " and t.status = @Status";
+                parameters.Add("Status", status);
+            }
+
+            sql += " order by t.id";
+
+            return await _dbConnection.QueryAsync<Transaction>(sql, parameters);
         }
 
-        public Task<int> CreateAsync(Transaction transaction)
+        public async Task<int> CreateAsync(Transaction transaction)
         {
-            throw new NotImplementedException();
+            var sql = @"
+                insert into transactions (fromaccountid, toaccountid, amount, performedat, status)
+                values 
+                    (@FromAccountId, @ToAccountId, @Amount, @PerformedAt, @Status)
+                returning id;";
+
+            return await _dbConnection.ExecuteScalarAsync<int>(sql, transaction);
         }
 
-        public Task<int> UpdateAsync(Transaction transaction)
+        public async Task<int> UpdateAsync(Transaction transaction)
         {
-            throw new NotImplementedException();
+            var sql = @"
+                update transactions
+                set 
+                    status = @Status
+                where id = @Id;";
+
+            return await _dbConnection.ExecuteAsync(sql, transaction);
         }
 
-        public Task<int> DeleteAsync(int id)
+        public async Task<int> DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            var sql = @"
+                delete
+                from transactions
+                where id = @id";
+
+            return await _dbConnection.ExecuteAsync(sql, new { id });
         }
     }
 }

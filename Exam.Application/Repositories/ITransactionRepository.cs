@@ -4,7 +4,7 @@ namespace Exam.Application.Repositories
 {
     public interface ITransactionRepository
     {
-        Task<Transaction>? FindByIdAsync(int id);
+        Task<Transaction?> FindByIdAsync(int id);
         Task<IEnumerable<Transaction>> FindAllAsync();
         Task<IEnumerable<Transaction>> SearchAsync(
             int? customer_id,
