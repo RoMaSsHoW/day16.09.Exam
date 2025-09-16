@@ -4,7 +4,7 @@ using System.Data;
 
 namespace Exam.Infrastructure.Repositories
 {
-    internal class AccountRepository : IAccountRepository
+    public class AccountRepository : IAccountRepository
     {
         private readonly IDbConnection _dbConnection;
 
