@@ -109,6 +109,40 @@ namespace Exam.Infrastructure.Repositories
             return await _dbConnection.QueryAsync<Transaction>(sql, parameters);
         }
 
+        public async Task<IEnumerable<Transaction>> GetSuspiciousTransactionsAsync()
+        {
+            var sql = @"
+                select 
+                    id as Id,
+                    fromaccountid as FromAccountId,
+                    toaccountid as ToAccountId,
+                    amount as Amount,
+                    performedat as PerformedAt,
+                    status as Status
+                from transactions
+                where amount > 10000
+
+                union
+
+                select 
+                    t.id as Id,
+                    t.fromaccountid as FromAccountId,
+                    t.toaccountid as ToAccountId,
+                    t.amount as Amount,
+                    t.performedat as PerformedAt,
+                    t.status as Status
+                from transactions t
+                join accounts a on a.id = t.fromaccountid
+                where (
+                    select count(*)
+                    from transactions t2
+                    where t2.fromaccountid = a.id AND 
+                          t2.performedat >= now() - interval '10 minutes'
+                ) > 5;";
+
+            return await _dbConnection.QueryAsync<Transaction>(sql);
+        }
+
         public async Task<int> CreateAsync(Transaction transaction)
         {
             var sql = @"

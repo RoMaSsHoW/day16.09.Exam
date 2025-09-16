@@ -34,6 +34,7 @@ namespace Exam.Api.Extentions
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddScoped<ITransactionRepository, TransactionRepository>();
+            services.AddScoped<IReportRepository, ReportRepository>();
         }
 
         private static void ConfigureServices(IServiceCollection services)

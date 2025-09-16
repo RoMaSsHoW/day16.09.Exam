@@ -13,6 +13,7 @@ namespace Exam.Application.Repositories
             decimal? min_amount,
             decimal? max_amount,
             string? status);
+        Task<IEnumerable<Transaction>> GetSuspiciousTransactionsAsync();
         Task<int> CreateAsync(Transaction transaction);
         Task<int> UpdateAsync(Transaction transaction);
         Task<int> DeleteAsync(int id);

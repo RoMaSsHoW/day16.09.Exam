@@ -51,6 +51,13 @@ namespace Exam.Api.Controllers
             return Ok(transactions);
         }
 
+        [HttpGet("suspicious")]
+        public async Task<IActionResult> GetSuspicious()
+        {
+            var result = await _transactionRepository.GetSuspiciousTransactionsAsync();
+            return Ok(result);
+        }
+
         [HttpPost("transfer")]
         public async Task<ActionResult> Transfer(int fromAccountId, int toAccountId, decimal amount)
         {
