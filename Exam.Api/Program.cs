@@ -1,6 +1,9 @@
 using AspNetCore.Swagger.Themes;
+using Exam.Api.Extentions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddApplicationServices(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
